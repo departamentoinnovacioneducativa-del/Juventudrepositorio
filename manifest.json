@@ -1,0 +1,26 @@
+{
+    "name": "Juventud 2.0 - Repositorio de IA",
+    "short_name": "Juventud 2.0",
+    "description": "Repositorio interactivo de inteligencias artificiales y herramientas educativas",
+    "start_url": "./index.html",
+    "display": "standalone",
+    "orientation": "portrait-primary",
+    "background_color": "#1a3a5c",
+    "theme_color": "#2c5f8d",
+    "scope": "./",
+    "lang": "es",
+    "icons": [
+        {
+            "src": "app.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "app.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}
