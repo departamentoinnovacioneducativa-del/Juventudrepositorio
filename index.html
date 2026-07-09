@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <!-- viewport-fit=cover es vital para iPhones con notch -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#1a3a5c">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Juventud 2.0">
+    <title>Juventud 2.0 - Repositorio de IA y Herramientas</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="app.png" type="image/png">
+    <link rel="apple-touch-icon" href="app.png">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent; /* Elimina el parpadeo azul al tocar en móvil */
+        }
+
+        :root {
+            --azul-marino: #1a3a5c;
+            --azul-medio: #2c5f8d;
+            --azul-claro: #4a90c2;
+            --amarillo: #ffd23f;
+            --amarillo-brillante: #ffcc00;
+            --texto: #ffffff;
+            --texto-secundario: #e0e8f0;
+            --radio-borde: 16px;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1a3a5c 0%, #2c5f8d 50%, #3a7ab0 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: var(--texto);
+            overflow-x: hidden;
+            /* Padding seguro para iPhones (Notch) y Androides */
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            padding: 30px 15px 20px;
+        }
+
+        .header-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: clamp(10px, 3vw, 30px); /* Espacio dinámico */
+            flex-wrap: nowrap;
+        }
+
+        .titulo-img {
+            width: clamp(60px, 12vw, 120px); /* Imagen más pequeña en móvil, grande en PC */
+            height: clamp(60px, 12vw, 120px);
+            object-fit: contain;
+            border-radius: 12px;
+            border: 3px solid var(--amarillo);
+            box-shadow: 0 0 20px rgba(255, 210, 63, 0.4);
+            flex-shrink: 0; /* Evita que se deforme */
+        }
+
+        .header-text {
+            text-align: center;
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(1.8rem, 6vw, 4rem); /* Título escalable */
+            font-weight: 900;
+            color: var(--amarillo);
+            text-shadow: 2px 2px 0 #1a3a5c, 4px 4px 15px rgba(0,0,0,0.6);
+            letter-spacing: clamp(1px, 0.5vw, 3px);
+            line-height: 1.1;
+        }
+
+        .subtitle {
+            font-size: clamp(0.8rem, 2.5vw, 1.1rem);
+            color: var(--texto-secundario);
+            margin-top: 8px;
+            font-weight: 300;
+        }
+
+        /* Buscador Sticky (Se queda fijo al hacer scroll) */
+        .search-container {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(26, 58, 92, 0.85);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            padding: 15px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid rgba(255, 210, 63, 0.3);
+        }
+
+        #searchInput {
+            width: 100%;
+            max-width: 700px;
+            margin: 0 auto;
+            display: block;
+            padding: 14px 25px;
+            font-size: 1rem;
+            border: 2px solid var(--amarillo);
+            border-radius: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--texto);
+            font-family: 'Poppins', sans-serif;
+            outline: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        #searchInput:focus {
+            box-shadow: 0 0 20px rgba(255, 210, 63, 0.4);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        #searchInput::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Categorías y Grid */
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 15px 40px;
+        }
+
+        .category {
+            margin-bottom: 40px;
+        }
+
+        .category-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(1.1rem, 3vw, 1.5rem);
+            color: var(--amarillo);
+            border-bottom: 2px solid var(--amarillo);
+            padding-bottom: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .category-title .icon {
+            font-size: clamp(1.3rem, 3.5vw, 1.8rem);
+        }
+
+        .tools-grid {
+            display: grid;
+            /* Grid inteligente: se adapta desde 1 columna en móvil hasta 4 en pantallas grandes */
+            grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+            gap: 15px;
+        }
+
+        .tool-card {
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid var(--amarillo);
+            border-radius: var(--radio-borde);
+            padding: 18px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            text-decoration: none;
+            color: var(--texto);
+            display: flex;
+            flex-direction: column;
+            min-height: 120px; /* Tamaño mínimo táctil */
+        }
+
+        .tool-card:active {
+            transform: scale(0.97); /* Efecto de pulsación en móvil */
+        }
+
+        .tool-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 210, 63, 0.1), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .tool-card:hover::before {
+            left: 100%;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            border-color: var(--amarillo-brillante);
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .tool-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--amarillo);
+            margin-bottom: 5px;
+        }
+
+        .tool-desc {
+            font-size: 0.85rem;
+            color: var(--texto-secundario);
+            line-height: 1.4;
+            flex-grow: 1;
+        }
+
+        .tool-link {
+            font-size: 0.75rem;
+            color: var(--amarillo);
+            margin-top: 12px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Botón flotante instalar */
+        #installBtn {
+            position: fixed;
+            bottom: calc(20px + env(safe-area-inset-bottom)); /* Safe area para iPhone */
+            right: calc(20px + env(safe-area-inset-right));
+            background: var(--amarillo);
+            color: var(--azul-marino);
+            border: none;
+            padding: 12px 20px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+            display: none;
+            align-items: center;
+            gap: 8px;
+            z-index: 1000;
+            transition: transform 0.2s ease;
+        }
+
+        #installBtn:active {
+            transform: scale(0.95);
+        }
+
+        #installBtn.show {
+            display: flex;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px 15px;
+            color: var(--texto-secundario);
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            margin-top: 20px;
+        }
+
+        .footer-logo {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid var(--amarillo);
+            margin-bottom: 10px;
+        }
+
+        /* Animaciones de entrada */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .category {
+            animation: fadeInUp 0.5s ease forwards;
+            opacity: 0;
+        }
+
+        /* Delays para efecto cascota */
+        .category:nth-child(1) { animation-delay: 0.05s; }
+        .category:nth-child(2) { animation-delay: 0.1s; }
+        .category:nth-child(3) { animation-delay: 0.15s; }
+        .category:nth-child(4) { animation-delay: 0.2s; }
+        .category:nth-child(5) { animation-delay: 0.25s; }
+        .category:nth-child(6) { animation-delay: 0.3s; }
+        .category:nth-child(7) { animation-delay: 0.35s; }
+        .category:nth-child(8) { animation-delay: 0.4s; }
+        .category:nth-child(9) { animation-delay: 0.45s; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <img src="titulo.png" alt="Logo Izquierdo" class="titulo-img">
+            <div class="header-text">
+                <h1>Juventud 2.0</h1>
+                <p class="subtitle">Repositorio de IA y Herramientas</p>
+            </div>
+            <img src="titulo.png" alt="Logo Derecho" class="titulo-img">
+        </div>
+    </header>
+
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="🔍 Buscar herramienta...">
+    </div>
+
+    <main id="mainContent">
+        <!-- El contenido se genera con JS -->
+    </main>
+
+    <button id="installBtn">📱 Instalar App</button>
+
+    <footer>
+        <img src="app.png" alt="Logo" class="footer-logo">
+        <p>© 2025 Juventud 2.0 - Departamento de Innovación Educativa</p>
+    </footer>
+
+    <script>
+        const categorias = [
+            {
+                titulo: "Desarrollos Institucionales y Proyectos Propios",
+                icon: "🏛️",
+                herramientas: [
+                    { nombre: "Edu Chema 2.0", url: "https://departamentoinnovacioneducativa-del.github.io/CHEMA-edu-2.0/", desc: "Plataforma educativa institucional" },
+                    { nombre: "Calculadora Juventud 2.0", url: "https://github.com/departamentoinnovacioneducativa-del/Calculadora-juventud-2.0", desc: "Calculadora educativa personalizada" }
+                ]
+            },
+            {
+                titulo: "01. Adaptación y Procesamiento de Información",
+                icon: "📚",
+                herramientas: [
+                    { nombre: "Diffit", url: "https://diffit.me", desc: "Adaptación de recursos educativos" },
+                    { nombre: "NotebookLM", url: "https://notebooklm.google.com", desc: "Asistente de investigación con IA de Google" },
+                    { nombre: "SciSpace", url: "https://scispace.com", desc: "Plataforma de investigación científica" },
+                    { nombre: "Elicit", url: "https://elicit.com", desc: "Asistente de investigación académica" },
+                    { nombre: "Perplexity AI", url: "https://www.perplexity.ai", desc: "Motor de búsqueda con IA" },
+                    { nombre: "Consensus", url: "https://consensus.app", desc: "Búsqueda basada en evidencia científica" }
+                ]
+            },
+            {
+                titulo: "02. Matemáticas",
+                icon: "🔢",
+                herramientas: [
+                    { nombre: "Symbolab", url: "https://symbolab.com", desc: "Calculadora matemática avanzada" },
+                    { nombre: "Photomath", url: "https://photomath.com", desc: "Resolución de problemas con la cámara" }
+                ]
+            },
+            {
+                titulo: "03. Conversación y Agentes IA",
+                icon: "🤖",
+                herramientas: [
+                    { nombre: "Gemini IA", url: "https://gemini.google.com", desc: "Asistente IA de Google" },
+                    { nombre: "Deepseek", url: "https://www.deepseek.com", desc: "Modelo de IA de código abierto" },
+                    { nombre: "Qwen", url: "https://chat.qwenlm.ai", desc: "Chat IA de Alibaba" },
+                    { nombre: "Manus", url: "https://manus.im", desc: "Agente IA autónomo" },
+                    { nombre: "Kimi", url: "https://kimi.moonshot.cn", desc: "Asistente IA chino" },
+                    { nombre: "Claude", url: "https://claude.ai", desc: "Asistente IA de Anthropic" },
+                    { nombre: "Poe", url: "https://poe.com", desc: "Plataforma multi-IA de Quora" },
+                    { nombre: "Chat Jimy", url: "#", desc: "Implementación local personalizada" }
+                ]
+            },
+            {
+                titulo: "04. Lectura y Escritura",
+                icon: "✍️",
+                herramientas: [
+                    { nombre: "Natural Readers", url: "https://naturalreaders.com", desc: "Texto a voz natural" },
+                    { nombre: "LanguageTool", url: "https://languagetool.org", desc: "Corrector ortográfico y gramatical" },
+                    { nombre: "Quillbot", url: "https://quillbot.com", desc: "Parafraseador y asistente de escritura" }
+                ]
+            },
+            {
+                titulo: "05. Ciencia y Modelado",
+                icon: "🔬",
+                herramientas: [
+                    { nombre: "BioDigital Human", url: "https://biodigital.com", desc: "Modelo 3D del cuerpo humano" },
+                    { nombre: "Tripo 3D", url: "https://www.tripo3d.ai", desc: "Generación de modelos 3D con IA" }
+                ]
+            },
+            {
+                titulo: "06. Apoyo, Productividad y Accesibilidad",
+                icon: "♿",
+                herramientas: [
+                    { nombre: "GoblinTools", url: "https://goblin.tools", desc: "Herramientas para neurodivergentes" },
+                    { nombre: "OPAL", url: "https://opal.io", desc: "Productividad y enfoque" },
+                    { nombre: "Formtochatbot", url: "https://formtochatbot.com", desc: "Convierte formularios en chatbots" }
+                ]
+            },
+            {
+                titulo: "07. Creación de Contenido, Medios y Web",
+                icon: "🎨",
+                herramientas: [
+                    { nombre: "Canva", url: "https://www.canva.com", desc: "Diseño gráfico y presentaciones" },
+                    { nombre: "Capcut online", url: "https://www.capcut.com", desc: "Editor de video online" },
+                    { nombre: "Suno", url: "https://suno.com", desc: "Generación de música con IA" },
+                    { nombre: "Websim", url: "https://websim.ai", desc: "Simulador web con IA" },
+                    { nombre: "Compose", url: "https://www.compose.ai", desc: "Asistente de escritura con IA" },
+                    { nombre: "Gamma", url: "https://gamma.app", desc: "Presentaciones con IA" },
+                    { nombre: "Leonardo.ai", url: "https://leonardo.ai", desc: "Generación de imágenes con IA" },
+                    { nombre: "ElevenLabs", url: "https://elevenlabs.io", desc: "Síntesis de voz con IA" },
+                    { nombre: "Comet", url: "https://www.comet.com", desc: "Plataforma MLOps" },
+                    { nombre: "Base 44", url: "#", desc: "Entorno de desarrollo personalizado" }
+                ]
+            },
+            {
+                titulo: "08. Gestión de Aula e Interactividad",
+                icon: "🏫",
+                herramientas: [
+                    { nombre: "Classroom", url: "https://classroom.google.com", desc: "Plataforma educativa de Google" },
+                    { nombre: "Mentimeter", url: "https://www.mentimeter.com", desc: "Presentaciones interactivas" },
+                    { nombre: "Padlet", url: "https://padlet.com", desc: "Tablero colaborativo" },
+                    { nombre: "Edpuzzle", url: "https://edpuzzle.com", desc: "Videos interactivos educativos" }
+                ]
+            }
+        ];
+
+        const mainContent = document.getElementById('mainContent');
+
+        function renderCategorias(filtro = '') {
+            mainContent.innerHTML = '';
+            const filtroLower = filtro.toLowerCase().trim();
+
+            let resultadosEncontrados = false;
+
+            categorias.forEach(cat => {
+                const herramientasFiltradas = cat.herramientas.filter(h =>
+                    h.nombre.toLowerCase().includes(filtroLower) ||
+                    h.desc.toLowerCase().includes(filtroLower)
+                );
+
+                if (filtroLower && herramientasFiltradas.length === 0) return;
+                resultadosEncontrados = true;
+
+                const categoryDiv = document.createElement('div');
+                categoryDiv.className = 'category';
+
+                const title = document.createElement('h2');
+                title.className = 'category-title';
+                title.innerHTML = `<span class="icon">${cat.icon}</span> ${cat.titulo}`;
+                categoryDiv.appendChild(title);
+
+                const grid = document.createElement('div');
+                grid.className = 'tools-grid';
+
+                herramientasFiltradas.forEach(h => {
+                    const card = document.createElement('a');
+                    card.className = 'tool-card';
+                    card.href = h.url;
+                    card.target = h.url !== '#' ? '_blank' : '';
+                    card.rel = 'noopener noreferrer';
+                    card.innerHTML = `
+                        <div class="tool-name">${h.nombre}</div>
+                        <div class="tool-desc">${h.desc}</div>
+                        ${h.url !== '#' ? '<div class="tool-link">🔗 Abrir herramienta</div>' : '<div class="tool-link">⚠️ Implementación local</div>'}
+                    `;
+                    grid.appendChild(card);
+                });
+
+                categoryDiv.appendChild(grid);
+                mainContent.appendChild(categoryDiv);
+            });
+
+            if (!resultadosEncontrados) {
+                mainContent.innerHTML = `<div style="text-align: center; padding: 40px; color: var(--amarillo); font-size: 1.2rem;">❌ No se encontraron herramientas para "${filtro}"</div>`;
+            }
+        }
+
+        renderCategorias();
+
+        // Buscador con pequeño debounce para mejor rendimiento en móvil
+        let searchTimeout;
+        const searchInput = document.getElementById('searchInput');
+        searchInput.addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                renderCategorias(e.target.value);
+            }, 200);
+        });
+
+        // Service Worker para PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(() => console.log('SW registrado'))
+                    .catch(err => console.log('Error SW:', err));
+            });
+        }
+
+        // Instalación PWA
+        let deferredPrompt;
+        const installBtn = document.getElementById('installBtn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Previene el mini-infobar en Android
+            e.preventDefault();
+            deferredPrompt = e;
+            // Muestra nuestro botón personalizado
+            installBtn.classList.add('show');
+        });
+
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                deferredPrompt = null;
+                installBtn.classList.remove('show');
+            }
+        });
+
+        window.addEventListener('appinstalled', () => {
+            installBtn.classList.remove('show');
+            console.log("App instalada correctamente");
+        });
+    </script>
+</body>
+</html>
